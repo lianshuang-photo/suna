@@ -37,7 +37,7 @@ class LLMRetryError(LLMError):
 
 def setup_api_keys() -> None:
     """Set up API keys from environment variables."""
-    providers = ['OPENAI', 'ANTHROPIC', 'GROQ', 'OPENROUTER']
+    providers = ['OPENAI', 'ANTHROPIC', 'GROQ', 'OPENROUTER', 'DEEPSEEK']
     for provider in providers:
         key = getattr(config, f'{provider}_API_KEY')
         if key:
@@ -234,6 +234,10 @@ def prepare_params(
         params["temperature"] = 1.0 # Required by Anthropic when reasoning_effort is used
         logger.info(f"Anthropic thinking enabled with reasoning_effort='{effort_level}'")
 
+    if "deepseek" in model_name.lower() and not model_name.startswith("openrouter/"):
+        logger.debug(f"Preparing DeepSeek parameters for model: {model_name}")
+        params["api_base"] = "https://api.deepseek.com"
+
     return params
 
 async def make_llm_api_call(
@@ -393,12 +397,34 @@ async def test_bedrock():
         print(f"Error testing Bedrock: {str(e)}")
         return False
 
+async def test_deepseek_official():
+    """Test the DeepSeek official API integration with a simple query."""
+    test_messages = [
+        {"role": "user", "content": "Hello, can you give me a quick test response?"}
+    ]
+    
+    try:
+        print("\n--- Testing DeepSeek official API ---")
+        response = await make_llm_api_call(
+            model_name="deepseek/deepseek-chat",
+            messages=test_messages,
+            temperature=0.7,
+            max_tokens=100
+        )
+        print(f"Response: {response.choices[0].message.content}")
+        print(f"Model used: {response.model}")
+        return True
+    except Exception as e:
+        print(f"Error testing DeepSeek official API: {str(e)}")
+        return False
+
 if __name__ == "__main__":
     import asyncio
 
-    test_success = asyncio.run(test_bedrock())
+    print("\n--- Running DeepSeek Official API Test ---")
+    test_success = asyncio.run(test_deepseek_official())
 
     if test_success:
-        print("\n✅ integration test completed successfully!")
+        print("\n✅ DeepSeek official API integration test completed successfully!")
     else:
-        print("\n❌ Bedrock integration test failed!")
+        print("\n❌ DeepSeek official API integration test failed!")

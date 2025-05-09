@@ -116,6 +116,7 @@ class Configuration:
     OPENROUTER_API_BASE: Optional[str] = "https://openrouter.ai/api/v1"
     OR_SITE_URL: Optional[str] = "https://kortix.ai"
     OR_APP_NAME: Optional[str] = "Kortix AI"    
+    DEEPSEEK_API_KEY: Optional[str] = "https://api.deepseek.com/v1"
     
     # AWS Bedrock credentials
     AWS_ACCESS_KEY_ID: Optional[str] = None

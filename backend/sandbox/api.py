@@ -95,8 +95,11 @@ async def get_sandbox_by_id_safely(client, sandbox_id: str):
     
     try:
         # Get the sandbox
-        sandbox = await get_or_create_project_sandbox(client, project_id)
-            
+        result = await get_or_create_project_sandbox(client, project_id)
+        if isinstance(result, tuple):
+            sandbox = result[0]
+        else:
+            sandbox = result
         return sandbox
     except Exception as e:
         logger.error(f"Error retrieving sandbox {sandbox_id}: {str(e)}")
